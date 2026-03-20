@@ -1,12 +1,18 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-import os
 from google import genai
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI()
 
-# Initialize client
-client = genai.Client(api_key=os.getenv("Gemini_key"))
+api_key = os.getenv("Gemini_key_here")
+
+client = genai.Client(
+    api_key=api_key
+)
 
 class ChatRequest(BaseModel):
     message: str
@@ -19,10 +25,8 @@ async def chat(req: ChatRequest):
             contents=req.message
         )
 
-        reply = response.text if hasattr(response, "text") else str(response)
-
         return {
-            "reply": reply
+            "reply": getattr(response, "text", str(response))
         }
 
     except Exception as e:
